@@ -9,42 +9,54 @@ import icon from "../images/emoji.svg";
 import styles from "../styles/Chat.module.css";
 import Messages from "./Messages";
 
-const socket = io.connect("https://online-chat-900l.onrender.com");
+const socket = io.connect("https://online-chat-nczk.onrender.com");
 
+// Определение компонента Chat
 const Chat = () => {
+  // Получение объекта search из location
   const { search } = useLocation();
+
+  // Получение функции navigate из react-router-dom
   const navigate = useNavigate();
+
+  // Состояния компонента
   const [params, setParams] = useState({ room: "", user: "" });
   const [state, setState] = useState([]);
   const [message, setMessage] = useState("");
   const [isOpen, setOpen] = useState(false);
   const [users, setUsers] = useState(0);
 
+  // Эффект для обработки изменений в параметрах поиска
   useEffect(() => {
     const searchParams = Object.fromEntries(new URLSearchParams(search));
     setParams(searchParams);
     socket.emit("join", searchParams);
   }, [search]);
 
+  // Эффект для обработки сообщений
   useEffect(() => {
     socket.on("message", ({ data }) => {
       setState((_state) => [..._state, data]);
     });
   }, []);
 
+  // Эффект для обработки информации о пользователях в комнате
   useEffect(() => {
     socket.on("room", ({ data: { users } }) => {
       setUsers(users.length);
     });
   }, []);
 
+  // Функция для выхода из комнаты
   const leftRoom = () => {
     socket.emit("leftRoom", { params });
     navigate("/");
   };
 
+  // Обработчик изменения в поле ввода сообщения
   const handleChange = ({ target: { value } }) => setMessage(value);
 
+  // Обработчик отправки сообщения
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -55,8 +67,10 @@ const Chat = () => {
     setMessage("");
   };
 
+  // Обработчик клика по emoji
   const onEmojiClick = ({ emoji }) => setMessage(`${message} ${emoji}`);
 
+  // Возвращение JSX-разметки компонента Chat
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
@@ -101,4 +115,5 @@ const Chat = () => {
   );
 };
 
+// Экспорт компонента Chat
 export default Chat;
